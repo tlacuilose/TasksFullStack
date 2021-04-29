@@ -5,6 +5,7 @@ import (
 	"github.com/kamva/mgm/v3"
 	"github.com/tlacuilose/tasks-api/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Get all todos - GET /api/todos
@@ -15,8 +16,12 @@ func GetAllTodos(ctx *fiber.Ctx) error {
 	// Array to store all todos.
 	todos := []models.Todo{}
 
+	findOptions := options.Find()
+	// Sort by created_at
+	findOptions.SetSort(bson.D{{"created_at", -1}})
+
 	// Retrieve all todos from db.
-	err := collection.SimpleFind(&todos, bson.D{})
+	err := collection.SimpleFindWithCtx(nil, &todos, bson.D{}, findOptions)
 	if err != nil {
 		ctx.Status(500).JSON(fiber.Map{
 			"ok":    false,
